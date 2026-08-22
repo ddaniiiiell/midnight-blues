@@ -110,13 +110,13 @@ body.pointer-active .cursor-glow {
   position: absolute;
   top: var(--start-y);
   left: var(--start-x);
-  width: 3px;
-  height: 3px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: #fff8ff;
   box-shadow:
-    0 0 0.4rem rgba(255, 240, 255, 0.9),
-    0 0 1rem rgba(206, 167, 226, 0.68);
+    0 0 0.55rem rgba(255, 244, 255, 1),
+    0 0 1.35rem rgba(213, 175, 234, 0.82);
   opacity: 0;
   animation: shootingStar var(--shoot-duration) linear forwards;
 }
@@ -127,8 +127,8 @@ body.pointer-active .cursor-glow {
   top: 50%;
   right: 1px;
   width: var(--tail-length);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(215, 183, 233, 0.65), #fff8ff);
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(220, 189, 238, 0.78), #fffaff);
   transform: translateY(-50%) rotate(var(--shoot-angle));
   transform-origin: right center;
 }
@@ -144,7 +144,7 @@ body.pointer-active .cursor-glow {
   color: var(--purple-light);
   background: transparent;
   cursor: pointer;
-  opacity: 0.28;
+  opacity: 0.44;
   transform: rotate(-4deg);
   transition:
     opacity 0.5s ease,
@@ -181,7 +181,9 @@ body.pointer-active .cursor-glow {
 
 .initial-stars {
   fill: #f7e8ff;
-  filter: drop-shadow(0 0 4px rgba(216, 182, 234, 0.9));
+  filter:
+    drop-shadow(0 0 4px rgba(235, 215, 245, 1))
+    drop-shadow(0 0 8px rgba(201, 157, 225, 0.74));
 }
 
 .initial-stars circle:nth-child(3n) {
@@ -316,18 +318,22 @@ body.midnight-mode .ambient-star {
 }
 
 body.midnight-mode .shooting-star {
-  background: #e4c8f7;
+  width: 5px;
+  height: 5px;
+  background: #f1dcff;
   box-shadow:
-    0 0 0.5rem rgba(234, 213, 249, 0.95),
-    0 0 1.2rem rgba(183, 130, 218, 0.76);
+    0 0 0.75rem rgba(247, 230, 255, 1),
+    0 0 1.8rem rgba(205, 158, 235, 0.98),
+    0 0 3rem rgba(169, 101, 212, 0.58);
 }
 
 body.midnight-mode .shooting-star::before {
-  background: linear-gradient(90deg, transparent, rgba(184, 135, 217, 0.68), #f0dcfb);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(190, 139, 224, 0.82), #f5e5ff);
 }
 
 body.midnight-mode .initial-cluster {
-  opacity: 0.58;
+  opacity: 0.78;
 }
 
 body.midnight-mode .initial-stars {
@@ -686,6 +692,67 @@ body.midnight-mode .story-star.is-opened .star-label {
 
 .letter-star .star-label {
   color: var(--pink);
+}
+
+.star-countdown {
+  position: absolute;
+  top: calc(100% + 1.85rem);
+  left: 50%;
+  width: max-content;
+  color: rgba(213, 192, 224, 0.7);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: 0.66rem;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity 0.5s ease;
+}
+
+.story-star.is-locked {
+  cursor: default;
+}
+
+.story-star.is-locked .star-core {
+  width: 0.32rem;
+  height: 0.32rem;
+  background: #a995b5;
+  box-shadow: 0 0 0.65rem rgba(183, 155, 198, 0.3);
+  opacity: 0.48;
+  animation-duration: 5.5s;
+}
+
+.story-star.is-locked .star-label {
+  color: rgba(196, 174, 208, 0.58);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: 0.66rem;
+  font-style: italic;
+  letter-spacing: 0.05em;
+  text-transform: lowercase;
+  opacity: 0.72;
+}
+
+body.midnight-mode .story-star.is-locked .star-core {
+  width: 0.32rem;
+  height: 0.32rem;
+  background: #aa91ba;
+  box-shadow: 0 0 0.75rem rgba(190, 151, 215, 0.4);
+  opacity: 0.52;
+}
+
+body.midnight-mode .story-star.is-locked .star-label {
+  color: rgba(207, 179, 225, 0.64);
+}
+
+.story-star.is-next-unlock .star-halo {
+  border-color: rgba(216, 188, 231, 0.36);
+  opacity: 0.38;
+  transform: scale(1);
+  animation: dreamingHalo 3.8s ease-in-out infinite;
+}
+
+.story-star.is-next-unlock .star-countdown {
+  opacity: 1;
 }
 
 .story-star:hover .star-label,
@@ -1287,6 +1354,11 @@ footer svg {
   to { opacity: 1; transform: translate(-50%, -50%) scale(1.18); }
 }
 
+@keyframes dreamingHalo {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 0.48; transform: scale(1.12); }
+}
+
 @keyframes starReveal {
   from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
   to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -1306,8 +1378,8 @@ footer svg {
   10% {
     opacity: 0.9;
   }
-  72% {
-    opacity: 0.72;
+  86% {
+    opacity: 0.82;
   }
   100% {
     opacity: 0;
@@ -1386,6 +1458,10 @@ footer svg {
   .star-label {
     max-width: 7rem;
     font-size: 0.52rem;
+  }
+
+  .star-countdown {
+    font-size: 0.58rem;
   }
 
   .story-star {

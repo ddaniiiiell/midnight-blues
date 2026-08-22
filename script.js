@@ -6,12 +6,14 @@ const stories = {
     number: "01",
     title: "A favorite moment",
     label: "memory no. 01",
+    releaseOrder: 1,
     home: { x: 11.7, y: 64.5 },
   },
   "letter-one": {
     type: "letter",
     title: "Open when you miss me",
     label: "open when you miss me",
+    releaseOrder: 2,
     home: { x: 27.4, y: 31.9 },
   },
   "memory-two": {
@@ -19,12 +21,14 @@ const stories = {
     number: "02",
     title: "The day we couldn't stop laughing",
     label: "memory no. 02",
+    releaseOrder: 3,
     home: { x: 45.5, y: 49.7 },
   },
   "letter-two": {
     type: "letter",
     title: "Open on a hard day",
     label: "open on a hard day",
+    releaseOrder: 4,
     home: { x: 62.2, y: 20.3 },
   },
   "memory-three": {
@@ -32,12 +36,14 @@ const stories = {
     number: "03",
     title: "A place worth remembering",
     label: "memory no. 03",
+    releaseOrder: 5,
     home: { x: 75.8, y: 45.6 },
   },
   "letter-three": {
     type: "letter",
     title: "Open when you need a smile",
     label: "open when you need a smile",
+    releaseOrder: 6,
     home: { x: 89.3, y: 28.8 },
   },
   "memory-four": {
@@ -45,6 +51,7 @@ const stories = {
     number: "04",
     title: "One of our little moments",
     label: "memory no. 04",
+    releaseOrder: 7,
     home: { x: 34, y: 80.6 },
   },
   "memory-five": {
@@ -52,6 +59,7 @@ const stories = {
     number: "05",
     title: "A memory for later",
     label: "memory no. 05",
+    releaseOrder: 8,
     home: { x: 64.6, y: 77.9 },
   },
   "final-star": {
@@ -97,6 +105,7 @@ const midnightMessages = [
 
 const requiredStoryIds = Object.entries(stories)
   .filter(([, story]) => !story.final)
+  .sort(([, first], [, second]) => first.releaseOrder - second.releaseOrder)
   .map(([storyId]) => storyId);
 
 const storageKeys = {
@@ -105,6 +114,7 @@ const storageKeys = {
   returnQueue: "midnight-blues:return-message-queue",
   returnSessionMessage: "midnight-blues:return-session-message",
   returnSessionActive: "midnight-blues:return-session-active",
+  firstDailyUnlock: "midnight-blues:first-daily-unlock",
 };
 
 const ambientContainer = document.querySelector(".ambient-stars");
@@ -137,6 +147,13 @@ function isPreviewing(mode) {
   return previewModes.has("all") || previewModes.has(mode);
 }
 
+// Temporary review overrides. Set these to false after copy and visual review.
+const reviewSettings = {
+  forceAllStoriesUnlocked: !previewModes.has("schedule"),
+  forceMidnightMode: true,
+  forceReturningVisitor: true,
+};
+
 function renderStoryStars() {
   const fragment = document.createDocumentFragment();
 
@@ -146,6 +163,7 @@ function renderStoryStars() {
     const halo = document.createElement("span");
     const core = document.createElement("span");
     const label = document.createElement("span");
+    const countdown = document.createElement("span");
 
     star.className = `story-star ${story.type}-star`;
     star.type = "button";
@@ -158,8 +176,9 @@ function renderStoryStars() {
     core.className = "star-core";
     label.className = "star-label";
     label.textContent = story.label;
+    countdown.className = "star-countdown";
 
-    star.append(halo, core, label);
+    star.append(halo, core, label, countdown);
     fragment.appendChild(star);
   });
 
@@ -204,7 +223,97 @@ function getOpenedStories() {
 }
 
 const openedStories = getOpenedStories();
+let unlockedStoryIds = new Set();
 let progressUpdatePending = false;
+
+function nextSixAmAfter(date) {
+  const nextUnlock = new Date(date);
+  nextUnlock.setHours(6, 0, 0, 0);
+  if (nextUnlock <= date) nextUnlock.setDate(nextUnlock.getDate() + 1);
+  return nextUnlock;
+}
+
+function dailyScheduleState(now = new Date()) {
+  if (reviewSettings.forceAllStoriesUnlocked) {
+    return { unlockedCount: requiredStoryIds.length, nextUnlockAt: null };
+  }
+
+  let firstUnlockAt = Number(readStorage(window.localStorage, storageKeys.firstDailyUnlock));
+  if (!Number.isFinite(firstUnlockAt) || firstUnlockAt <= 0) {
+    firstUnlockAt = nextSixAmAfter(now).getTime();
+    writeStorage(window.localStorage, storageKeys.firstDailyUnlock, String(firstUnlockAt));
+  }
+
+  let unlockedCount = Math.min(1, requiredStoryIds.length);
+  const nextUnlock = new Date(firstUnlockAt);
+
+  while (unlockedCount < requiredStoryIds.length && nextUnlock <= now) {
+    unlockedCount += 1;
+    nextUnlock.setDate(nextUnlock.getDate() + 1);
+    nextUnlock.setHours(6, 0, 0, 0);
+  }
+
+  const highestOpenedIndex = requiredStoryIds.reduce(
+    (highest, storyId, index) => openedStories.has(storyId) ? Math.max(highest, index) : highest,
+    -1,
+  );
+  unlockedCount = Math.max(unlockedCount, highestOpenedIndex + 1);
+
+  return {
+    unlockedCount,
+    nextUnlockAt: unlockedCount < requiredStoryIds.length ? nextUnlock.getTime() : null,
+  };
+}
+
+function formatCountdown(milliseconds) {
+  const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${hours}h ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
+}
+
+function applyDailyUnlocks() {
+  const now = new Date();
+  const { unlockedCount, nextUnlockAt } = dailyScheduleState(now);
+  unlockedStoryIds = new Set(requiredStoryIds.slice(0, unlockedCount));
+  const nextStoryId = requiredStoryIds[unlockedCount];
+
+  storyStarElements.forEach((star) => {
+    const storyId = star.dataset.story;
+    const story = stories[storyId];
+    const label = star.querySelector(".star-label");
+    const countdown = star.querySelector(".star-countdown");
+    const isUnlocked = unlockedStoryIds.has(storyId);
+    const isNext = storyId === nextStoryId;
+
+    star.classList.toggle("is-locked", !isUnlocked);
+    star.classList.toggle("is-next-unlock", isNext);
+    star.disabled = !isUnlocked;
+    star.tabIndex = isUnlocked ? 0 : -1;
+
+    if (isUnlocked) {
+      label.textContent = story.label;
+      countdown.textContent = "";
+      star.removeAttribute("aria-label");
+    } else {
+      label.textContent = "still dreaming";
+      countdown.textContent = isNext && nextUnlockAt
+        ? formatCountdown(nextUnlockAt - now.getTime())
+        : "";
+      star.setAttribute(
+        "aria-label",
+        isNext && countdown.textContent
+          ? `Still dreaming. Unlocks in ${countdown.textContent}`
+          : "Still dreaming. This star unlocks on a future day.",
+      );
+    }
+  });
+}
+
+function isStoryUnlocked(storyId) {
+  return storyId === "final-star" || unlockedStoryIds.has(storyId);
+}
 
 function showOpenedStories() {
   openedStories.forEach((storyId) => {
@@ -277,10 +386,10 @@ function createShootingStar() {
   const startX = randomBetween(12, 88);
   const startY = randomBetween(4, 46);
   const direction = startX < 35 ? 1 : startX > 65 ? -1 : Math.random() > 0.5 ? 1 : -1;
-  const travelX = randomBetween(280, 560) * direction;
-  const travelY = randomBetween(120, 280);
+  const travelX = randomBetween(480, 850) * direction;
+  const travelY = randomBetween(190, 420);
   const angle = Math.atan2(travelY, travelX) * (180 / Math.PI);
-  const duration = randomBetween(1.25, 2.35);
+  const duration = randomBetween(1.9, 3.2);
 
   star.className = "shooting-star";
   star.style.setProperty("--start-x", `${startX}vw`);
@@ -289,7 +398,7 @@ function createShootingStar() {
   star.style.setProperty("--travel-y", `${travelY}px`);
   star.style.setProperty("--shoot-angle", `${angle}deg`);
   star.style.setProperty("--shoot-duration", `${duration}s`);
-  star.style.setProperty("--tail-length", `${randomBetween(70, 150)}px`);
+  star.style.setProperty("--tail-length", `${randomBetween(130, 240)}px`);
   star.addEventListener("animationend", () => star.remove(), { once: true });
   shootingSky.appendChild(star);
 }
@@ -547,7 +656,7 @@ function showDialog() {
 
 function openStory(storyId) {
   const story = stories[storyId];
-  if (!story) return;
+  if (!story || !isStoryUnlocked(storyId)) return;
 
   rememberOpenedStory(storyId);
   if (story.type === "memory") populateMemory(story);
@@ -584,7 +693,9 @@ function currentMidnightMessage() {
 
 function applyMidnightMode() {
   const hour = new Date().getHours();
-  const isMidnight = isPreviewing("midnight") || (hour >= 0 && hour < 6);
+  const isMidnight = reviewSettings.forceMidnightMode
+    || isPreviewing("midnight")
+    || (hour >= 0 && hour < 6);
   document.body.classList.toggle("midnight-mode", isMidnight);
   madeFor.textContent = isMidnight
     ? "missing me after midnight? well i miss you more"
@@ -625,7 +736,8 @@ function initializeReturningVisitor() {
     window.sessionStorage,
     storageKeys.returnSessionActive,
   ) === "true";
-  const isReturning = isPreviewing("returning")
+  const isReturning = reviewSettings.forceReturningVisitor
+    || isPreviewing("returning")
     || sessionAlreadyReturning
     || Boolean(previousVisit && previousVisit !== today);
 
@@ -636,6 +748,7 @@ function initializeReturningVisitor() {
 
 makeAmbientStars();
 showOpenedStories();
+applyDailyUnlocks();
 initializeConstellationLayout();
 updateFinalStar();
 applyMidnightMode();
@@ -707,6 +820,7 @@ window.addEventListener("resize", () => {
 });
 
 window.setInterval(applyMidnightMode, 60000);
+window.setInterval(applyDailyUnlocks, 1000);
 
 if (!reducedMotion.matches) {
   window.setTimeout(createShootingStar, 5000);

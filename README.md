@@ -29,5 +29,8 @@ Opened stories, returning visits, and non-repeating welcome-back messages are
 stored only in the visitor's browser. Midnight mode follows the visitor's local
 time and is active from 12:00 a.m. through 5:59 a.m.
 
-To review special states without waiting, open the site with `?preview=all`.
-Use `?preview=midnight` or `?preview=returning` to review either state alone.
+During the current review phase, all story stars, midnight mode, and the
+returning-visitor star are temporarily forced on through `reviewSettings` in
+`script.js`. Open the site with `?preview=schedule` to inspect the real daily
+release state instead: the first story is available immediately and each next
+story wakes at 6:00 a.m. local time with a live countdown.
