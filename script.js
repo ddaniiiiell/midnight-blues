@@ -939,8 +939,30 @@ function flushProgressUpdate() {
   updateFinalStar({ announce: true });
 }
 
+function skyHeadingTopOffset() {
+  return parseFloat(window.getComputedStyle(skyHeading).scrollMarginTop) || 0;
+}
+
+function updateSkyScrollReserve() {
+  const root = document.documentElement;
+  const currentReserve = parseFloat(root.style.getPropertyValue("--sky-scroll-reserve")) || 0;
+  const naturalDocumentHeight = root.scrollHeight - currentReserve;
+  const headingTop = skyHeading.getBoundingClientRect().top + window.scrollY;
+  const desiredScrollTop = Math.max(0, headingTop - skyHeadingTopOffset());
+  const requiredDocumentHeight = desiredScrollTop + window.innerHeight;
+  const reserve = Math.max(0, Math.ceil(requiredDocumentHeight - naturalDocumentHeight));
+  root.style.setProperty("--sky-scroll-reserve", `${reserve}px`);
+}
+
 function scrollToSky() {
-  skyHeading.scrollIntoView({ behavior: "smooth", block: "start" });
+  updateSkyScrollReserve();
+  window.requestAnimationFrame(() => {
+    const headingTop = skyHeading.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({
+      top: Math.max(0, headingTop - skyHeadingTopOffset()),
+      behavior: reducedMotion.matches ? "auto" : "smooth",
+    });
+  });
   window.setTimeout(() => storyStarElements[0]?.focus({ preventScroll: true }), 900);
 }
 
@@ -1101,6 +1123,7 @@ updateFinalStar();
 applyMidnightMode();
 initializeReturningVisitor();
 scheduleInactivityCheck();
+window.requestAnimationFrame(updateSkyScrollReserve);
 
 enterButton.addEventListener("click", scrollToSky);
 
@@ -1173,6 +1196,7 @@ window.addEventListener("resize", () => {
   window.clearTimeout(resizeTimer);
   hideAmbientStarConnection();
   updateMoonJourney();
+  updateSkyScrollReserve();
   resizeTimer = window.setTimeout(() => {
     window.cancelAnimationFrame(constellationAnimationFrame);
     initializeConstellationLayout();

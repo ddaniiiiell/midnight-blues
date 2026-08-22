@@ -78,6 +78,11 @@ body.midnight-mode .page-shell::before {
   opacity: 1;
 }
 
+.scroll-reserve {
+  height: var(--sky-scroll-reserve, 0px);
+  pointer-events: none;
+}
+
 .ambient-stars {
   position: absolute;
   z-index: -1;
