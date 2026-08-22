@@ -122,6 +122,7 @@ const shootingSky = document.querySelector(".shooting-sky");
 const initialCluster = document.querySelector(".initial-cluster");
 const midnightStar = document.querySelector(".midnight-star");
 const returnStar = document.querySelector(".return-star");
+const midnightToggle = document.querySelector(".midnight-toggle");
 const madeFor = document.querySelector(".made-for");
 const enterButton = document.querySelector(".enter-button");
 const sky = document.querySelector(".sky");
@@ -153,6 +154,7 @@ const reviewSettings = {
   forceMidnightMode: true,
   forceReturningVisitor: true,
 };
+let manualMidnightOverride = null;
 
 function renderStoryStars() {
   const fragment = document.createDocumentFragment();
@@ -693,14 +695,17 @@ function currentMidnightMessage() {
 
 function applyMidnightMode() {
   const hour = new Date().getHours();
-  const isMidnight = reviewSettings.forceMidnightMode
+  const automaticMidnight = reviewSettings.forceMidnightMode
     || isPreviewing("midnight")
     || (hour >= 0 && hour < 6);
+  const isMidnight = manualMidnightOverride ?? automaticMidnight;
   document.body.classList.toggle("midnight-mode", isMidnight);
   madeFor.textContent = isMidnight
     ? "missing me after midnight? well i miss you more"
     : madeFor.dataset.defaultText;
   setSpecialStarVisibility(midnightStar, isMidnight);
+  midnightToggle.setAttribute("aria-pressed", String(isMidnight));
+  midnightToggle.querySelector("span").textContent = isMidnight ? "midnight on" : "midnight off";
 }
 
 function shuffled(values) {
@@ -755,6 +760,11 @@ applyMidnightMode();
 initializeReturningVisitor();
 
 enterButton.addEventListener("click", scrollToSky);
+
+midnightToggle.addEventListener("click", () => {
+  manualMidnightOverride = !document.body.classList.contains("midnight-mode");
+  applyMidnightMode();
+});
 
 document.querySelectorAll(".story-star").forEach((star) => {
   star.addEventListener("click", () => openStory(star.dataset.story));
