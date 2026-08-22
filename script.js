@@ -4,14 +4,14 @@ const stories = {
   "memory-one": {
     type: "memory",
     number: "01",
-    title: "A favorite moment",
+    title: "a favorite moment",
     label: "memory no. 01",
     releaseOrder: 1,
     home: { x: 11.7, y: 64.5 },
   },
   "letter-one": {
     type: "letter",
-    title: "Open when you miss me",
+    title: "open when you miss me",
     label: "open when you miss me",
     releaseOrder: 2,
     home: { x: 27.4, y: 31.9 },
@@ -19,14 +19,14 @@ const stories = {
   "memory-two": {
     type: "memory",
     number: "02",
-    title: "The day we couldn't stop laughing",
+    title: "the day we couldn't stop laughing",
     label: "memory no. 02",
     releaseOrder: 3,
     home: { x: 45.5, y: 49.7 },
   },
   "letter-two": {
     type: "letter",
-    title: "Open on a hard day",
+    title: "open on a hard day",
     label: "open on a hard day",
     releaseOrder: 4,
     home: { x: 62.2, y: 20.3 },
@@ -34,14 +34,14 @@ const stories = {
   "memory-three": {
     type: "memory",
     number: "03",
-    title: "A place worth remembering",
+    title: "a place worth remembering",
     label: "memory no. 03",
     releaseOrder: 5,
     home: { x: 75.8, y: 45.6 },
   },
   "letter-three": {
     type: "letter",
-    title: "Open when you need a smile",
+    title: "open when you need a smile",
     label: "open when you need a smile",
     releaseOrder: 6,
     home: { x: 89.3, y: 28.8 },
@@ -49,7 +49,7 @@ const stories = {
   "memory-four": {
     type: "memory",
     number: "04",
-    title: "One of our little moments",
+    title: "one of our little moments",
     label: "memory no. 04",
     releaseOrder: 7,
     home: { x: 34, y: 80.6 },
@@ -57,14 +57,14 @@ const stories = {
   "memory-five": {
     type: "memory",
     number: "05",
-    title: "A memory for later",
+    title: "a memory for later",
     label: "memory no. 05",
     releaseOrder: 8,
     home: { x: 64.6, y: 77.9 },
   },
   "final-star": {
     type: "letter",
-    title: "For everything still to come",
+    title: "for everything still to come",
     final: true,
   },
 };
@@ -73,33 +73,33 @@ const stories = {
 const returnMessages = [
   {
     id: "brighter-again",
-    title: "You came back",
-    message: "The stars noticed you came back. Somehow, this little universe feels brighter again.",
+    title: "you came back",
+    message: "the stars noticed you came back. somehow, this little universe feels brighter again.",
   },
   {
     id: "saved-your-place",
-    title: "Your place was waiting",
-    message: "This little corner of the sky saved your place. It always will.",
+    title: "your place was waiting",
+    message: "this little corner of the sky saved your place. it always will.",
   },
   {
     id: "found-your-way",
-    title: "Welcome back, love",
-    message: "You found your way back through the stars, and there was another note waiting for you.",
+    title: "welcome back, love",
+    message: "you found your way back through the stars, and there was another note waiting for you.",
   },
 ];
 
 const midnightMessages = [
   {
-    title: "For this quiet hour",
-    message: "If you're awake beneath these stars, imagine me somewhere under the same sky, missing you too.",
+    title: "for this quiet hour",
+    message: "if you're awake beneath these stars, imagine me somewhere under the same sky, missing you too.",
   },
   {
-    title: "The world is quiet",
-    message: "Everything may be still right now, but there is always a little light here waiting for you.",
+    title: "the world is quiet",
+    message: "everything may be still right now, but there is always a little light here waiting for you.",
   },
   {
-    title: "A note after midnight",
-    message: "Some hours feel softer because they seem to belong only to us.",
+    title: "a note after midnight",
+    message: "some hours feel softer because they seem to belong only to us.",
   },
 ];
 
@@ -123,6 +123,7 @@ const initialCluster = document.querySelector(".initial-cluster");
 const midnightStar = document.querySelector(".midnight-star");
 const returnStar = document.querySelector(".return-star");
 const midnightToggle = document.querySelector(".midnight-toggle");
+const returnerToggle = document.querySelector(".returner-toggle");
 const madeFor = document.querySelector(".made-for");
 const enterButton = document.querySelector(".enter-button");
 const sky = document.querySelector(".sky");
@@ -155,6 +156,8 @@ const reviewSettings = {
   forceReturningVisitor: true,
 };
 let manualMidnightOverride = null;
+let manualReturnerOverride = null;
+let automaticReturningVisitor = false;
 
 function renderStoryStars() {
   const fragment = document.createDocumentFragment();
@@ -306,8 +309,8 @@ function applyDailyUnlocks() {
       star.setAttribute(
         "aria-label",
         isNext && countdown.textContent
-          ? `Still dreaming. Unlocks in ${countdown.textContent}`
-          : "Still dreaming. This star unlocks on a future day.",
+          ? `still dreaming. unlocks in ${countdown.textContent}`
+          : "still dreaming. this star unlocks on a future day.",
       );
     }
   });
@@ -363,14 +366,26 @@ function seededRandom(seed) {
 
 function makeAmbientStars() {
   const fragment = document.createDocumentFragment();
+  const regularStarCount = 100;
+  const midnightStarCount = 60;
 
-  for (let index = 0; index < 100; index += 1) {
+  for (let index = 0; index < regularStarCount + midnightStarCount; index += 1) {
+    const isMidnightOnly = index >= regularStarCount;
     const star = document.createElement("span");
-    star.className = index % 19 === 0 ? "ambient-star accent-star" : "ambient-star";
+    star.className = [
+      "ambient-star",
+      index % 19 === 0 ? "accent-star" : "",
+      isMidnightOnly ? "midnight-only-star" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
     star.style.setProperty("--left", `${seededRandom(index + 1) * 100}%`);
     star.style.setProperty("--top", `${seededRandom(index + 101) * 100}%`);
     star.style.setProperty("--size", `${0.65 + seededRandom(index + 201) * 1.45}px`);
-    star.style.setProperty("--opacity", `${0.1 + seededRandom(index + 301) * 0.34}`);
+    star.style.setProperty(
+      "--opacity",
+      `${(isMidnightOnly ? 0.16 : 0.1) + seededRandom(index + 301) * (isMidnightOnly ? 0.4 : 0.34)}`,
+    );
     star.style.setProperty("--duration", `${2.4 + seededRandom(index + 401) * 4}s`);
     star.style.setProperty("--delay", `${seededRandom(index + 501) * -5}s`);
     fragment.appendChild(star);
@@ -629,7 +644,7 @@ function populateLetter(story) {
     card.querySelector(".dialog-kicker").textContent = "the final star";
     card.querySelector(".letter-sheet span").textContent = "one last thing";
     card.querySelector(".letter-message > p:nth-child(2)").textContent =
-      "This final star is waiting for the words that bring your little universe together.";
+      "this final star is waiting for the words that bring your little universe together.";
   }
 
   dialogContent.replaceChildren(card);
@@ -734,6 +749,13 @@ function currentReturnMessage() {
   return returnMessages.find(({ id }) => id === nextMessageId) || returnMessages[0];
 }
 
+function applyReturnerVisibility() {
+  const isVisible = manualReturnerOverride ?? automaticReturningVisitor;
+  setSpecialStarVisibility(returnStar, isVisible);
+  returnerToggle.setAttribute("aria-pressed", String(isVisible));
+  returnerToggle.querySelector("span").textContent = isVisible ? "returner on" : "returner off";
+}
+
 function initializeReturningVisitor() {
   const today = localDateKey();
   const previousVisit = readStorage(window.localStorage, storageKeys.lastVisit);
@@ -741,14 +763,16 @@ function initializeReturningVisitor() {
     window.sessionStorage,
     storageKeys.returnSessionActive,
   ) === "true";
-  const isReturning = reviewSettings.forceReturningVisitor
+  automaticReturningVisitor = reviewSettings.forceReturningVisitor
     || isPreviewing("returning")
     || sessionAlreadyReturning
     || Boolean(previousVisit && previousVisit !== today);
 
   writeStorage(window.localStorage, storageKeys.lastVisit, today);
-  if (isReturning) writeStorage(window.sessionStorage, storageKeys.returnSessionActive, "true");
-  setSpecialStarVisibility(returnStar, isReturning);
+  if (automaticReturningVisitor) {
+    writeStorage(window.sessionStorage, storageKeys.returnSessionActive, "true");
+  }
+  applyReturnerVisibility();
 }
 
 makeAmbientStars();
@@ -764,6 +788,11 @@ enterButton.addEventListener("click", scrollToSky);
 midnightToggle.addEventListener("click", () => {
   manualMidnightOverride = !document.body.classList.contains("midnight-mode");
   applyMidnightMode();
+});
+
+returnerToggle.addEventListener("click", () => {
+  manualReturnerOverride = !returnStar.classList.contains("is-visible");
+  applyReturnerVisibility();
 });
 
 document.querySelectorAll(".story-star").forEach((star) => {

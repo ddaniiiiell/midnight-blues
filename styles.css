@@ -314,11 +314,19 @@ body.pointer-active .cursor-glow {
   left: 62%;
 }
 
-.midnight-toggle {
+.review-controls {
   position: fixed;
   z-index: 8;
   right: 1.25rem;
   bottom: 1.25rem;
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.midnight-toggle,
+.returner-toggle {
   display: inline-flex;
   gap: 0.55rem;
   align-items: center;
@@ -333,7 +341,7 @@ body.pointer-active .cursor-glow {
   font-size: 0.61rem;
   font-weight: 600;
   letter-spacing: 0.12em;
-  text-transform: uppercase;
+  text-transform: lowercase;
   transition:
     color 0.3s ease,
     border-color 0.3s ease,
@@ -342,7 +350,9 @@ body.pointer-active .cursor-glow {
 }
 
 .midnight-toggle:hover,
-.midnight-toggle:focus-visible {
+.midnight-toggle:focus-visible,
+.returner-toggle:hover,
+.returner-toggle:focus-visible {
   border-color: rgba(226, 203, 239, 0.5);
   color: #f1dffb;
   background: rgba(33, 21, 42, 0.9);
@@ -350,7 +360,8 @@ body.pointer-active .cursor-glow {
   transform: translateY(-2px);
 }
 
-.midnight-toggle svg {
+.midnight-toggle svg,
+.returner-toggle svg {
   width: 1rem;
   fill: none;
   stroke: currentColor;
@@ -359,7 +370,8 @@ body.pointer-active .cursor-glow {
   stroke-width: 1.4;
 }
 
-.midnight-toggle[aria-pressed="false"] {
+.midnight-toggle[aria-pressed="false"],
+.returner-toggle[aria-pressed="false"] {
   color: #8f8297;
   background: rgba(22, 17, 27, 0.68);
 }
@@ -397,6 +409,11 @@ body.midnight-mode .open-letter:hover {
 
 body.midnight-mode .ambient-star {
   animation-duration: 7s;
+  filter: brightness(1.3);
+}
+
+body.midnight-mode .ambient-star.midnight-only-star {
+  display: block;
 }
 
 body.midnight-mode .shooting-star {
@@ -448,6 +465,10 @@ body.midnight-mode .initial-traces {
     0 0 1rem rgba(199, 159, 221, 0.3);
 }
 
+.ambient-star.midnight-only-star {
+  display: none;
+}
+
 .site-header {
   position: absolute;
   z-index: 4;
@@ -461,7 +482,7 @@ body.midnight-mode .initial-traces {
   color: var(--muted);
   font-size: 0.72rem;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
+  text-transform: lowercase;
 }
 
 .wordmark {
@@ -504,7 +525,7 @@ body.midnight-mode .initial-traces {
   font-size: 0.7rem;
   font-weight: 500;
   letter-spacing: 0.22em;
-  text-transform: uppercase;
+  text-transform: lowercase;
 }
 
 .eyebrow span {
@@ -555,7 +576,7 @@ h1 em {
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
+  text-transform: lowercase;
   transition:
     background 0.3s ease,
     border-color 0.3s ease,
@@ -764,7 +785,7 @@ body.midnight-mode .story-star.is-opened .star-label {
   letter-spacing: 0.12em;
   line-height: 1.4;
   text-align: center;
-  text-transform: uppercase;
+  text-transform: lowercase;
   opacity: 0.6;
   transform: translateX(-50%);
   transition:
@@ -927,7 +948,7 @@ body.midnight-mode .story-star.is-locked .star-label {
   color: var(--dim);
   font-size: 0.65rem;
   letter-spacing: 0.14em;
-  text-transform: uppercase;
+  text-transform: lowercase;
 }
 
 .legend span {
@@ -1096,7 +1117,7 @@ body.midnight-mode .story-dialog::backdrop {
   font-size: 0.63rem;
   font-weight: 600;
   letter-spacing: 0.18em;
-  text-transform: uppercase;
+  text-transform: lowercase;
 }
 
 .special-message-card {
@@ -1204,7 +1225,7 @@ body.midnight-mode .story-dialog::backdrop {
 .photo-placeholder span {
   font-size: 0.6rem;
   letter-spacing: 0.15em;
-  text-transform: uppercase;
+  text-transform: lowercase;
 }
 
 .memory-copy {
@@ -1218,7 +1239,7 @@ body.midnight-mode .story-dialog::backdrop {
   font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
+  text-transform: lowercase;
 }
 
 .memory-copy h3,
@@ -1542,9 +1563,13 @@ body.midnight-mode .story-dialog::backdrop {
     font-size: 0.66rem;
   }
 
-  .midnight-toggle {
+  .review-controls {
     right: 0.8rem;
     bottom: 0.8rem;
+  }
+
+  .midnight-toggle,
+  .returner-toggle {
     padding: 0.65rem 0.75rem;
     font-size: 0.56rem;
   }

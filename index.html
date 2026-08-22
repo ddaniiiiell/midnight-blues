@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="A tiny universe of memories and letters, made with love."
+      content="a tiny universe of memories and letters, made with love."
     />
     <meta name="theme-color" content="#171020" />
-    <title>Our Little Universe</title>
+    <title>our little universe</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -20,7 +20,7 @@
       <button
         class="initial-cluster"
         type="button"
-        aria-label="Reveal a hidden D and K constellation"
+        aria-label="reveal a hidden d and k constellation"
         aria-pressed="false"
       >
         <svg viewBox="0 0 210 100" aria-hidden="true">
@@ -51,13 +51,13 @@
             <circle cx="169" cy="86" r="1.9" />
           </g>
         </svg>
-        <span>D + K, written in the stars</span>
+        <span>d + k, written in the stars</span>
       </button>
 
       <button
         class="special-sky-star midnight-star"
         type="button"
-        aria-label="Open a note for after midnight"
+        aria-label="open a note for after midnight"
         aria-hidden="true"
         tabindex="-1"
         disabled
@@ -69,7 +69,7 @@
       <button
         class="special-sky-star return-star"
         type="button"
-        aria-label="Open a welcome-back message"
+        aria-label="open a welcome-back message"
         aria-hidden="true"
         tabindex="-1"
         disabled
@@ -78,16 +78,25 @@
         <span class="special-star-label">welcome back</span>
       </button>
 
-      <button class="midnight-toggle" type="button" aria-pressed="true">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M17.8 15.7A7.8 7.8 0 0 1 8.3 6.2 8 8 0 1 0 17.8 15.7Z" />
-          <path d="M17.5 4v4M15.5 6h4" />
-        </svg>
-        <span>midnight on</span>
-      </button>
+      <div class="review-controls">
+        <button class="returner-toggle" type="button" aria-pressed="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3c.5 5.4 3.6 8.5 9 9-5.4.5-8.5 3.6-9 9-.5-5.4-3.6-8.5-9-9 5.4-.5 8.5-3.6 9-9Z" />
+          </svg>
+          <span>returner on</span>
+        </button>
+
+        <button class="midnight-toggle" type="button" aria-pressed="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M17.8 15.7A7.8 7.8 0 0 1 8.3 6.2 8 8 0 1 0 17.8 15.7Z" />
+            <path d="M17.5 4v4M15.5 6h4" />
+          </svg>
+          <span>midnight on</span>
+        </button>
+      </div>
 
       <header class="site-header">
-        <a class="wordmark" href="#top" aria-label="Our little universe, home">
+        <a class="wordmark" href="#top" aria-label="our little universe, home">
           <svg viewBox="0 0 32 32" aria-hidden="true">
             <path d="M16 3c.7 7.8 5.2 12.3 13 13-7.8.7-12.3 5.2-13 13-.7-7.8-5.2-12.3-13-13C10.8 15.3 15.3 10.8 16 3Z" />
           </svg>
@@ -100,7 +109,7 @@
         <section class="hero" aria-labelledby="hero-title">
           <p class="eyebrow"><span></span> a tiny corner of the sky</p>
           <h1 id="hero-title">
-            Our little<br />
+            our little<br />
             <em>universe.</em>
           </h1>
           <button class="enter-button" type="button">
@@ -111,12 +120,12 @@
           </button>
         </section>
 
-        <section class="sky" aria-label="Our constellation">
+        <section class="sky" aria-label="our constellation">
           <div class="sky-heading">
             <p class="eyebrow"><span></span> our constellation</p>
           </div>
 
-          <div class="constellation" aria-label="An interactive constellation of memories and letters">
+          <div class="constellation" aria-label="an interactive constellation of memories and letters">
             <svg class="constellation-lines" viewBox="0 0 1000 620" preserveAspectRatio="none" aria-hidden="true">
               <path class="constellation-path" />
             </svg>
@@ -141,7 +150,7 @@
 
           </div>
 
-          <div class="legend" aria-label="Constellation legend">
+          <div class="legend" aria-label="constellation legend">
             <span><i class="memory-key"></i> memories</span>
             <span><i class="letter-key"></i> little letters</span>
           </div>
@@ -157,7 +166,7 @@
     </div>
 
     <dialog class="story-dialog" aria-labelledby="dialog-title">
-      <button class="close-dialog" type="button" aria-label="Close">
+      <button class="close-dialog" type="button" aria-label="close">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
       </button>
       <div class="dialog-content"></div>
@@ -166,7 +175,7 @@
     <template id="memory-template">
       <article class="memory-card">
         <p class="dialog-kicker">a memory for safekeeping</p>
-        <div class="photo-placeholder" aria-label="Placeholder for a future photo">
+        <div class="photo-placeholder" aria-label="placeholder for a future photo">
           <svg viewBox="0 0 80 80" aria-hidden="true">
             <path d="M13 60 31 39l13 14 8-9 15 16M13 18h54v44H13z" />
             <circle cx="52" cy="30" r="5" />
@@ -175,8 +184,8 @@
         </div>
         <div class="memory-copy">
           <p class="memory-date">someday, somewhere lovely</p>
-          <h3 id="dialog-title">A favorite moment</h3>
-          <p>This star is waiting for a story only the two of you could tell.</p>
+          <h3 id="dialog-title">a favorite moment</h3>
+          <p>this star is waiting for a story only the two of you could tell.</p>
         </div>
       </article>
     </template>
@@ -200,13 +209,13 @@
         </div>
         <div class="letter-intro">
           <p class="memory-date">sealed with love</p>
-          <h3 id="dialog-title">Open when&hellip;</h3>
+          <h3 id="dialog-title">open when&hellip;</h3>
           <button class="open-letter" type="button">open this letter</button>
         </div>
         <div class="letter-message" aria-live="polite">
-          <p>My love,</p>
-          <p>This page is waiting for the words you want her to find here.</p>
-          <p class="letter-signoff">Always yours,<br /><span>your favorite person</span></p>
+          <p>my love,</p>
+          <p>this page is waiting for the words you want her to find here.</p>
+          <p class="letter-signoff">always yours,<br /><span>your favorite person</span></p>
         </div>
       </article>
     </template>
@@ -217,7 +226,7 @@
         <svg class="message-star" viewBox="0 0 64 64" aria-hidden="true">
           <path d="M32 4c1.2 16.1 10.7 25.6 28 28-17.3 2.4-26.8 11.9-28 28C30.8 43.9 21.3 34.4 4 32 21.3 29.6 30.8 20.1 32 4Z" />
         </svg>
-        <h3 id="dialog-title">Welcome back</h3>
+        <h3 id="dialog-title">welcome back</h3>
         <p class="special-message-body"></p>
         <p class="special-message-signoff">always yours, under the same sky</p>
       </article>
