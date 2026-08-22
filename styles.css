@@ -303,8 +303,9 @@ body.pointer-active .cursor-glow {
 }
 
 .return-star {
-  top: 5.25rem;
-  right: clamp(1.25rem, 5vw, 5.25rem);
+  top: 49svh;
+  right: auto;
+  left: 62%;
 }
 
 body.midnight-mode .made-for {
@@ -1433,8 +1434,9 @@ footer svg {
   }
 
   .return-star {
-    top: 6.5rem;
-    right: 0.75rem;
+    top: 53svh;
+    right: auto;
+    left: 58%;
   }
 
   .special-star-label {
