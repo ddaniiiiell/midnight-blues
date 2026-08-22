@@ -162,19 +162,30 @@ body.midnight-mode .aurora-ribbon {
 
 .midnight-moon-glow {
   --moon-glow-opacity: 0.58;
-  position: absolute;
-  top: clamp(5rem, 11vh, 8rem);
-  left: clamp(2rem, 8vw, 7rem);
+  --moon-x: 8vw;
+  --moon-y: 28vh;
+  position: fixed;
+  z-index: -1;
+  top: var(--moon-y);
+  left: var(--moon-x);
   display: grid;
   width: 8rem;
   height: 8rem;
   place-items: center;
-  opacity: var(--moon-glow-opacity);
+  opacity: 0;
+  pointer-events: none;
+  translate: -50% -50%;
   animation: moonFloat 9s ease-in-out infinite alternate;
   animation-play-state: paused;
+  transition:
+    top 65s linear,
+    left 65s linear,
+    opacity 2.8s ease;
+  will-change: top, left, opacity;
 }
 
-body.midnight-mode .midnight-moon-glow {
+.midnight-moon-glow.is-visible {
+  opacity: var(--moon-glow-opacity);
   animation-play-state: running;
 }
 
@@ -1821,8 +1832,6 @@ body.midnight-mode .story-dialog::backdrop {
   }
 
   .midnight-moon-glow {
-    top: 6.5rem;
-    left: 0.8rem;
     scale: 0.78;
   }
 

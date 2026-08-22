@@ -409,6 +409,17 @@ function randomBetween(minimum, maximum) {
 
 const synodicMonthDays = 29.530588;
 const knownNewMoonUtc = Date.UTC(2000, 0, 6, 18, 15);
+const moonObserver = Object.freeze({
+  latitude: 38.9897,
+  longitude: -76.9378,
+  timeZone: "America/New_York",
+});
+const observerDateFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: moonObserver.timeZone,
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+});
 
 function currentMoonPhase(date = new Date()) {
   const daysSinceKnownNewMoon = (date.getTime() - knownNewMoonUtc) / 86400000;
@@ -453,7 +464,110 @@ function updateMoonPhase() {
   moonLight.setAttribute("d", moonLightPath(phase, illumination));
   midnightMoon.dataset.phase = moonPhaseName(phase);
   midnightMoon.dataset.illumination = illumination.toFixed(3);
-  moonGlow.style.setProperty("--moon-glow-opacity", `${0.3 + illumination * 0.36}`);
+  moonGlow.style.setProperty("--moon-glow-opacity", `${0.08 + illumination * 0.58}`);
+}
+
+function observerCalendarDate(date) {
+  const parts = Object.fromEntries(
+    observerDateFormatter
+      .formatToParts(date)
+      .filter(({ type }) => type !== "literal")
+      .map(({ type, value }) => [type, Number(value)]),
+  );
+  return { year: parts.year, month: parts.month, day: parts.day };
+}
+
+function shiftCalendarDate({ year, month, day }, dayOffset) {
+  const shifted = new Date(Date.UTC(year, month - 1, day + dayOffset));
+  return {
+    year: shifted.getUTCFullYear(),
+    month: shifted.getUTCMonth() + 1,
+    day: shifted.getUTCDate(),
+  };
+}
+
+function solarEventsForDate({ year, month, day }) {
+  const radians = Math.PI / 180;
+  const startOfYear = Date.UTC(year, 0, 0);
+  const dayStartUtc = Date.UTC(year, month - 1, day);
+  const dayOfYear = Math.floor((dayStartUtc - startOfYear) / 86400000);
+  const daysInYear = new Date(Date.UTC(year, 1, 29)).getUTCDate() === 29 ? 366 : 365;
+  const fractionalYear = (2 * Math.PI / daysInYear) * (dayOfYear - 1);
+  const equationOfTime = 229.18 * (
+    0.000075
+    + 0.001868 * Math.cos(fractionalYear)
+    - 0.032077 * Math.sin(fractionalYear)
+    - 0.014615 * Math.cos(2 * fractionalYear)
+    - 0.040849 * Math.sin(2 * fractionalYear)
+  );
+  const solarDeclination = 0.006918
+    - 0.399912 * Math.cos(fractionalYear)
+    + 0.070257 * Math.sin(fractionalYear)
+    - 0.006758 * Math.cos(2 * fractionalYear)
+    + 0.000907 * Math.sin(2 * fractionalYear)
+    - 0.002697 * Math.cos(3 * fractionalYear)
+    + 0.00148 * Math.sin(3 * fractionalYear);
+  const latitudeRadians = moonObserver.latitude * radians;
+  const hourAngleCosine = (
+    Math.cos(90.833 * radians) / (Math.cos(latitudeRadians) * Math.cos(solarDeclination))
+  ) - Math.tan(latitudeRadians) * Math.tan(solarDeclination);
+  const hourAngle = Math.acos(Math.min(1, Math.max(-1, hourAngleCosine))) / radians;
+  const sunriseMinutesUtc = 720
+    - 4 * (moonObserver.longitude + hourAngle)
+    - equationOfTime;
+  const sunsetMinutesUtc = 720
+    - 4 * (moonObserver.longitude - hourAngle)
+    - equationOfTime;
+
+  return {
+    sunrise: new Date(dayStartUtc + sunriseMinutesUtc * 60000),
+    sunset: new Date(dayStartUtc + sunsetMinutesUtc * 60000),
+  };
+}
+
+function moonNightWindow(date = new Date()) {
+  const today = observerCalendarDate(date);
+  const todayEvents = solarEventsForDate(today);
+
+  if (date < todayEvents.sunrise) {
+    return {
+      sunset: solarEventsForDate(shiftCalendarDate(today, -1)).sunset,
+      sunrise: todayEvents.sunrise,
+    };
+  }
+
+  if (date >= todayEvents.sunset) {
+    return {
+      sunset: todayEvents.sunset,
+      sunrise: solarEventsForDate(shiftCalendarDate(today, 1)).sunrise,
+    };
+  }
+
+  return null;
+}
+
+function updateMoonJourney(date = new Date()) {
+  const nightWindow = moonNightWindow(date);
+  if (!nightWindow) {
+    moonGlow.classList.remove("is-visible");
+    midnightMoon.dataset.nightProgress = "daylight";
+    return;
+  }
+
+  const nightDuration = nightWindow.sunrise - nightWindow.sunset;
+  const progress = Math.min(1, Math.max(0, (date - nightWindow.sunset) / nightDuration));
+  const horizontalMargin = Math.min(112, Math.max(58, window.innerWidth * 0.08));
+  const startX = horizontalMargin;
+  const endX = window.innerWidth - horizontalMargin;
+  const horizonY = Math.max(150, Math.min(260, window.innerHeight * 0.3));
+  const apexY = Math.max(68, Math.min(96, window.innerHeight * 0.09));
+  const x = startX + (endX - startX) * progress;
+  const y = horizonY - Math.sin(progress * Math.PI) * (horizonY - apexY);
+
+  moonGlow.style.setProperty("--moon-x", `${x}px`);
+  moonGlow.style.setProperty("--moon-y", `${y}px`);
+  moonGlow.classList.add("is-visible");
+  midnightMoon.dataset.nightProgress = progress.toFixed(3);
 }
 
 const maxActiveShootingStars = 3;
@@ -978,6 +1092,7 @@ function initializeReturningVisitor() {
 
 makeAmbientStars();
 updateMoonPhase();
+updateMoonJourney();
 showOpenedStories();
 applyDailyUnlocks();
 initializeConstellationLayout();
@@ -1056,6 +1171,7 @@ let resizeTimer;
 window.addEventListener("resize", () => {
   window.clearTimeout(resizeTimer);
   hideAmbientStarConnection();
+  updateMoonJourney();
   resizeTimer = window.setTimeout(() => {
     window.cancelAnimationFrame(constellationAnimationFrame);
     initializeConstellationLayout();
@@ -1064,7 +1180,14 @@ window.addEventListener("resize", () => {
 
 window.setInterval(applyMidnightMode, 60000);
 window.setInterval(applyDailyUnlocks, 1000);
+window.setInterval(updateMoonJourney, 60000);
 window.setInterval(updateMoonPhase, 60 * 60 * 1000);
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  updateMoonPhase();
+  updateMoonJourney();
+});
 
 if (!reducedMotion.matches) {
   scheduleNextShootingStar({ initial: true });
