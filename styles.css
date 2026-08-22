@@ -826,6 +826,10 @@ h1 em {
   margin-bottom: 0;
 }
 
+.sky-heading {
+  scroll-margin-top: clamp(1.25rem, 5vh, 3.5rem);
+}
+
 .constellation {
   position: relative;
   width: 100%;

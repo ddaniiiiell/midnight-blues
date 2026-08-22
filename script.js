@@ -132,6 +132,7 @@ const returnerToggle = document.querySelector(".returner-toggle");
 const madeFor = document.querySelector(".made-for");
 const enterButton = document.querySelector(".enter-button");
 const sky = document.querySelector(".sky");
+const skyHeading = document.querySelector(".sky-heading");
 const constellation = document.querySelector(".constellation");
 const constellationPath = document.querySelector(".constellation-path");
 const storyStarsContainer = document.querySelector(".story-stars");
@@ -939,7 +940,7 @@ function flushProgressUpdate() {
 }
 
 function scrollToSky() {
-  sky.scrollIntoView({ behavior: "smooth", block: "start" });
+  skyHeading.scrollIntoView({ behavior: "smooth", block: "start" });
   window.setTimeout(() => storyStarElements[0]?.focus({ preventScroll: true }), 900);
 }
 
