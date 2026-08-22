@@ -819,8 +819,7 @@ h1 em {
 
 .sky {
   position: relative;
-  min-height: 100svh;
-  padding: 7rem max(1.4rem, calc((100vw - 1180px) / 2)) 1.5rem;
+  padding: 7rem max(1.4rem, calc((100vw - 1180px) / 2)) 0.75rem;
 }
 
 .sky-heading .eyebrow {
@@ -1152,6 +1151,7 @@ body.midnight-mode .story-star.is-locked .star-label {
   display: flex;
   gap: 2rem;
   justify-content: flex-end;
+  margin-top: -4rem;
   color: var(--dim);
   font-size: 0.65rem;
   letter-spacing: 0.14em;
