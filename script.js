@@ -55,13 +55,13 @@ function seededRandom(seed) {
 function makeAmbientStars() {
   const fragment = document.createDocumentFragment();
 
-  for (let index = 0; index < 105; index += 1) {
+  for (let index = 0; index < 64; index += 1) {
     const star = document.createElement("span");
     star.className = "ambient-star";
     star.style.setProperty("--left", `${seededRandom(index + 1) * 100}%`);
     star.style.setProperty("--top", `${seededRandom(index + 101) * 100}%`);
     star.style.setProperty("--size", `${0.8 + seededRandom(index + 201) * 1.8}px`);
-    star.style.setProperty("--opacity", `${0.16 + seededRandom(index + 301) * 0.55}`);
+    star.style.setProperty("--opacity", `${0.12 + seededRandom(index + 301) * 0.36}`);
     star.style.setProperty("--duration", `${2.4 + seededRandom(index + 401) * 4}s`);
     star.style.setProperty("--delay", `${seededRandom(index + 501) * -5}s`);
     fragment.appendChild(star);
