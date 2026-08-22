@@ -118,7 +118,12 @@ const storageKeys = {
 };
 
 const ambientContainer = document.querySelector(".ambient-stars");
+const ambientStarConnection = document.querySelector(".star-hover-connection");
+const moonGlow = document.querySelector(".midnight-moon-glow");
+const midnightMoon = document.querySelector(".midnight-moon");
+const moonLight = document.querySelector(".moon-light");
 const shootingSky = document.querySelector(".shooting-sky");
+const idleWhisper = document.querySelector(".idle-whisper");
 const initialCluster = document.querySelector(".initial-cluster");
 const midnightStar = document.querySelector(".midnight-star");
 const returnStar = document.querySelector(".return-star");
@@ -158,6 +163,9 @@ const reviewSettings = {
 let manualMidnightOverride = null;
 let manualReturnerOverride = null;
 let automaticReturningVisitor = false;
+let ambientStarElements = [];
+let ambientConnectionFrame = null;
+let latestPointerPosition = null;
 
 function renderStoryStars() {
   const fragment = document.createDocumentFragment();
@@ -392,21 +400,74 @@ function makeAmbientStars() {
   }
 
   ambientContainer.appendChild(fragment);
+  ambientStarElements = [...ambientContainer.querySelectorAll(".ambient-star")];
 }
 
 function randomBetween(minimum, maximum) {
   return minimum + Math.random() * (maximum - minimum);
 }
 
+const synodicMonthDays = 29.530588;
+const knownNewMoonUtc = Date.UTC(2000, 0, 6, 18, 15);
+
+function currentMoonPhase(date = new Date()) {
+  const daysSinceKnownNewMoon = (date.getTime() - knownNewMoonUtc) / 86400000;
+  const elapsedCycles = daysSinceKnownNewMoon / synodicMonthDays;
+  const phase = ((elapsedCycles % 1) + 1) % 1;
+  const illumination = (1 - Math.cos(phase * Math.PI * 2)) / 2;
+  return { phase, illumination };
+}
+
+function moonPhaseName(phase) {
+  const phases = [
+    "new moon",
+    "waxing crescent",
+    "first quarter",
+    "waxing gibbous",
+    "full moon",
+    "waning gibbous",
+    "last quarter",
+    "waning crescent",
+  ];
+  return phases[Math.floor((phase + 0.0625) * 8) % phases.length];
+}
+
+function moonLightPath(phase, illumination) {
+  if (illumination < 0.0005) return "";
+  if (illumination > 0.9995) {
+    return "M 50 5 A 45 45 0 0 1 50 95 A 45 45 0 0 1 50 5 Z";
+  }
+
+  const waxing = phase < 0.5;
+  const outerSweep = waxing ? 1 : 0;
+  const phaseCosine = Math.cos(phase * Math.PI * 2);
+  const terminatorControlX = waxing
+    ? 50 + 90 * phaseCosine
+    : 50 - 90 * phaseCosine;
+
+  return `M 50 5 A 45 45 0 0 ${outerSweep} 50 95 Q ${terminatorControlX} 50 50 5 Z`;
+}
+
+function updateMoonPhase() {
+  const { phase, illumination } = currentMoonPhase();
+  moonLight.setAttribute("d", moonLightPath(phase, illumination));
+  midnightMoon.dataset.phase = moonPhaseName(phase);
+  midnightMoon.dataset.illumination = illumination.toFixed(3);
+  moonGlow.style.setProperty("--moon-glow-opacity", `${0.3 + illumination * 0.36}`);
+}
+
+const maxActiveShootingStars = 3;
+
 function createShootingStar() {
+  if (shootingSky.querySelectorAll(".shooting-star").length >= maxActiveShootingStars) return;
+
   const star = document.createElement("span");
-  const startX = randomBetween(12, 88);
-  const startY = randomBetween(4, 46);
-  const direction = startX < 35 ? 1 : startX > 65 ? -1 : Math.random() > 0.5 ? 1 : -1;
-  const travelX = randomBetween(480, 850) * direction;
-  const travelY = randomBetween(190, 420);
-  const angle = Math.atan2(travelY, travelX) * (180 / Math.PI);
-  const duration = randomBetween(1.9, 3.2);
+  const startX = randomBetween(-8, 42);
+  const startY = randomBetween(-5, 28);
+  const angle = randomBetween(18, 38);
+  const travelX = Math.max(randomBetween(window.innerWidth * 0.55, window.innerWidth * 0.9), 520);
+  const travelY = travelX * Math.tan(angle * (Math.PI / 180));
+  const duration = randomBetween(2.2, 4.1);
 
   star.className = "shooting-star";
   star.style.setProperty("--start-x", `${startX}vw`);
@@ -416,8 +477,147 @@ function createShootingStar() {
   star.style.setProperty("--shoot-angle", `${angle}deg`);
   star.style.setProperty("--shoot-duration", `${duration}s`);
   star.style.setProperty("--tail-length", `${randomBetween(130, 240)}px`);
-  star.addEventListener("animationend", () => star.remove(), { once: true });
+  const cleanupTimer = window.setTimeout(() => star.remove(), (duration + 0.75) * 1000);
+  star.addEventListener("animationend", () => {
+    window.clearTimeout(cleanupTimer);
+    star.remove();
+  }, { once: true });
   shootingSky.appendChild(star);
+}
+
+function createShootingStarEvent() {
+  const activeCount = shootingSky.querySelectorAll(".shooting-star").length;
+  const availableSlots = maxActiveShootingStars - activeCount;
+  if (availableSlots <= 0) return;
+
+  const roll = Math.random();
+  const requestedCount = roll < 0.08 ? 3 : roll < 0.3 ? 2 : 1;
+  const eventCount = Math.min(requestedCount, availableSlots);
+
+  for (let index = 0; index < eventCount; index += 1) {
+    window.setTimeout(createShootingStar, index * randomBetween(180, 520));
+  }
+}
+
+function scheduleNextShootingStar({ initial = false } = {}) {
+  const delay = initial ? randomBetween(4500, 8000) : randomBetween(11000, 24000);
+  window.setTimeout(() => {
+    createShootingStarEvent();
+    scheduleNextShootingStar();
+  }, delay);
+}
+
+function hideAmbientStarConnection() {
+  ambientStarConnection.classList.remove("is-visible");
+}
+
+function renderAmbientStarConnection() {
+  ambientConnectionFrame = null;
+  if (!latestPointerPosition || document.body.classList.contains("dialog-open")) {
+    hideAmbientStarConnection();
+    return;
+  }
+
+  const bounds = ambientContainer.getBoundingClientRect();
+  const midnightMode = document.body.classList.contains("midnight-mode");
+  const points = ambientStarElements
+    .filter((star) => midnightMode || !star.classList.contains("midnight-only-star"))
+    .map((star) => ({
+      x: bounds.left + (parseFloat(star.style.getPropertyValue("--left")) / 100) * bounds.width,
+      y: bounds.top + (parseFloat(star.style.getPropertyValue("--top")) / 100) * bounds.height,
+    }))
+    .filter(({ x, y }) => (
+      x >= -24
+      && x <= window.innerWidth + 24
+      && y >= -24
+      && y <= window.innerHeight + 24
+    ));
+
+  let hoveredPoint = null;
+  let hoveredDistance = Number.POSITIVE_INFINITY;
+
+  points.forEach((point) => {
+    const distance = Math.hypot(
+      point.x - latestPointerPosition.x,
+      point.y - latestPointerPosition.y,
+    );
+    if (distance < hoveredDistance) {
+      hoveredDistance = distance;
+      hoveredPoint = point;
+    }
+  });
+
+  if (!hoveredPoint || hoveredDistance > 52) {
+    hideAmbientStarConnection();
+    return;
+  }
+
+  let neighborPoint = null;
+  let neighborDistance = Number.POSITIVE_INFINITY;
+
+  points.forEach((point) => {
+    const distance = Math.hypot(point.x - hoveredPoint.x, point.y - hoveredPoint.y);
+    if (distance > 0.5 && distance < neighborDistance) {
+      neighborDistance = distance;
+      neighborPoint = point;
+    }
+  });
+
+  if (!neighborPoint || neighborDistance > 230) {
+    hideAmbientStarConnection();
+    return;
+  }
+
+  const angle = Math.atan2(
+    neighborPoint.y - hoveredPoint.y,
+    neighborPoint.x - hoveredPoint.x,
+  ) * (180 / Math.PI);
+
+  ambientStarConnection.style.left = `${hoveredPoint.x}px`;
+  ambientStarConnection.style.top = `${hoveredPoint.y}px`;
+  ambientStarConnection.style.width = `${neighborDistance}px`;
+  ambientStarConnection.style.setProperty("--connection-angle", `${angle}deg`);
+  ambientStarConnection.classList.add("is-visible");
+}
+
+function queueAmbientStarConnection(event) {
+  latestPointerPosition = { x: event.clientX, y: event.clientY };
+  if (ambientConnectionFrame !== null) return;
+  ambientConnectionFrame = window.requestAnimationFrame(renderAmbientStarConnection);
+}
+
+const inactivityDelay = 3 * 60 * 1000;
+let inactivityCheckTimer = null;
+let lastActivityAt = Date.now();
+
+function hideIdleWhisper() {
+  idleWhisper.classList.remove("is-visible");
+  idleWhisper.textContent = "";
+}
+
+function scheduleInactivityCheck() {
+  window.clearTimeout(inactivityCheckTimer);
+  const remaining = Math.max(0, inactivityDelay - (Date.now() - lastActivityAt));
+
+  inactivityCheckTimer = window.setTimeout(() => {
+    const inactiveFor = Date.now() - lastActivityAt;
+    if (inactiveFor < inactivityDelay) {
+      scheduleInactivityCheck();
+      return;
+    }
+
+    idleWhisper.textContent = "still here?";
+    idleWhisper.classList.add("is-visible");
+    inactivityCheckTimer = null;
+  }, remaining);
+}
+
+function recordActivity() {
+  lastActivityAt = Date.now();
+  if (idleWhisper.classList.contains("is-visible")) {
+    hideIdleWhisper();
+  }
+  if (inactivityCheckTimer === null) scheduleInactivityCheck();
 }
 
 function pointDistance(first, second, width, height) {
@@ -719,6 +919,7 @@ function applyMidnightMode() {
     ? "missing me after midnight? well i miss you more"
     : madeFor.dataset.defaultText;
   setSpecialStarVisibility(midnightStar, isMidnight);
+  hideAmbientStarConnection();
   midnightToggle.setAttribute("aria-pressed", String(isMidnight));
   midnightToggle.querySelector("span").textContent = isMidnight ? "midnight on" : "midnight off";
 }
@@ -776,12 +977,14 @@ function initializeReturningVisitor() {
 }
 
 makeAmbientStars();
+updateMoonPhase();
 showOpenedStories();
 applyDailyUnlocks();
 initializeConstellationLayout();
 updateFinalStar();
 applyMidnightMode();
 initializeReturningVisitor();
+scheduleInactivityCheck();
 
 enterButton.addEventListener("click", scrollToSky);
 
@@ -852,6 +1055,7 @@ initialCluster.addEventListener("click", () => {
 let resizeTimer;
 window.addEventListener("resize", () => {
   window.clearTimeout(resizeTimer);
+  hideAmbientStarConnection();
   resizeTimer = window.setTimeout(() => {
     window.cancelAnimationFrame(constellationAnimationFrame);
     initializeConstellationLayout();
@@ -860,10 +1064,10 @@ window.addEventListener("resize", () => {
 
 window.setInterval(applyMidnightMode, 60000);
 window.setInterval(applyDailyUnlocks, 1000);
+window.setInterval(updateMoonPhase, 60 * 60 * 1000);
 
 if (!reducedMotion.matches) {
-  window.setTimeout(createShootingStar, 5000);
-  window.setInterval(createShootingStar, 15000);
+  scheduleNextShootingStar({ initial: true });
 }
 
 if (window.matchMedia("(pointer: fine)").matches) {
@@ -871,5 +1075,14 @@ if (window.matchMedia("(pointer: fine)").matches) {
     document.body.classList.add("pointer-active");
     document.documentElement.style.setProperty("--mouse-x", `${event.clientX}px`);
     document.documentElement.style.setProperty("--mouse-y", `${event.clientY}px`);
+    queueAmbientStarConnection(event);
   });
+  document.addEventListener("pointerleave", hideAmbientStarConnection);
+  window.addEventListener("scroll", hideAmbientStarConnection, { passive: true });
 }
+
+document.addEventListener("pointermove", recordActivity, { passive: true });
+document.addEventListener("pointerdown", recordActivity, { passive: true });
+document.addEventListener("keydown", recordActivity);
+document.addEventListener("touchstart", recordActivity, { passive: true });
+window.addEventListener("scroll", recordActivity, { passive: true });
