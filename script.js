@@ -39,6 +39,8 @@ const stories = {
 };
 
 const ambientContainer = document.querySelector(".ambient-stars");
+const shootingSky = document.querySelector(".shooting-sky");
+const initialCluster = document.querySelector(".initial-cluster");
 const enterButton = document.querySelector(".enter-button");
 const sky = document.querySelector(".sky");
 const dialog = document.querySelector(".story-dialog");
@@ -46,6 +48,36 @@ const dialogContent = document.querySelector(".dialog-content");
 const closeButton = document.querySelector(".close-dialog");
 const memoryTemplate = document.querySelector("#memory-template");
 const letterTemplate = document.querySelector("#letter-template");
+const openedStoriesKey = "midnight-blues:opened-stories";
+
+function getOpenedStories() {
+  try {
+    const savedStories = JSON.parse(window.localStorage.getItem(openedStoriesKey) || "[]");
+    return new Set(savedStories.filter((storyId) => Object.hasOwn(stories, storyId)));
+  } catch {
+    return new Set();
+  }
+}
+
+const openedStories = getOpenedStories();
+
+function showOpenedStories() {
+  openedStories.forEach((storyId) => {
+    const star = document.querySelector(`[data-story="${storyId}"]`);
+    star?.classList.add("is-opened");
+  });
+}
+
+function rememberOpenedStory(storyId) {
+  openedStories.add(storyId);
+  document.querySelector(`[data-story="${storyId}"]`)?.classList.add("is-opened");
+
+  try {
+    window.localStorage.setItem(openedStoriesKey, JSON.stringify([...openedStories]));
+  } catch {
+    // The brighter state still works for this visit when storage is unavailable.
+  }
+}
 
 function seededRandom(seed) {
   const value = Math.sin(seed * 9301 + 49297) * 233280;
@@ -55,19 +87,45 @@ function seededRandom(seed) {
 function makeAmbientStars() {
   const fragment = document.createDocumentFragment();
 
-  for (let index = 0; index < 64; index += 1) {
+  for (let index = 0; index < 100; index += 1) {
     const star = document.createElement("span");
-    star.className = "ambient-star";
+    star.className = index % 19 === 0 ? "ambient-star accent-star" : "ambient-star";
     star.style.setProperty("--left", `${seededRandom(index + 1) * 100}%`);
     star.style.setProperty("--top", `${seededRandom(index + 101) * 100}%`);
-    star.style.setProperty("--size", `${0.8 + seededRandom(index + 201) * 1.8}px`);
-    star.style.setProperty("--opacity", `${0.12 + seededRandom(index + 301) * 0.36}`);
+    star.style.setProperty("--size", `${0.65 + seededRandom(index + 201) * 1.45}px`);
+    star.style.setProperty("--opacity", `${0.1 + seededRandom(index + 301) * 0.34}`);
     star.style.setProperty("--duration", `${2.4 + seededRandom(index + 401) * 4}s`);
     star.style.setProperty("--delay", `${seededRandom(index + 501) * -5}s`);
     fragment.appendChild(star);
   }
 
   ambientContainer.appendChild(fragment);
+}
+
+function randomBetween(minimum, maximum) {
+  return minimum + Math.random() * (maximum - minimum);
+}
+
+function createShootingStar() {
+  const star = document.createElement("span");
+  const startX = randomBetween(12, 88);
+  const startY = randomBetween(4, 46);
+  const direction = startX < 35 ? 1 : startX > 65 ? -1 : Math.random() > 0.5 ? 1 : -1;
+  const travelX = randomBetween(280, 560) * direction;
+  const travelY = randomBetween(120, 280);
+  const angle = Math.atan2(travelY, travelX) * (180 / Math.PI);
+  const duration = randomBetween(1.25, 2.35);
+
+  star.className = "shooting-star";
+  star.style.setProperty("--start-x", `${startX}vw`);
+  star.style.setProperty("--start-y", `${startY}vh`);
+  star.style.setProperty("--travel-x", `${travelX}px`);
+  star.style.setProperty("--travel-y", `${travelY}px`);
+  star.style.setProperty("--shoot-angle", `${angle}deg`);
+  star.style.setProperty("--shoot-duration", `${duration}s`);
+  star.style.setProperty("--tail-length", `${randomBetween(70, 150)}px`);
+  star.addEventListener("animationend", () => star.remove(), { once: true });
+  shootingSky.appendChild(star);
 }
 
 function scrollToSky() {
@@ -102,6 +160,8 @@ function openStory(storyId) {
   const story = stories[storyId];
   if (!story) return;
 
+  rememberOpenedStory(storyId);
+
   if (story.type === "memory") {
     populateMemory(story);
   } else {
@@ -118,6 +178,7 @@ function closeStory() {
 }
 
 makeAmbientStars();
+showOpenedStories();
 
 enterButton.addEventListener("click", scrollToSky);
 
@@ -146,6 +207,16 @@ const skyObserver = new IntersectionObserver(
 );
 
 skyObserver.observe(sky);
+
+initialCluster.addEventListener("click", () => {
+  const isRevealed = initialCluster.classList.toggle("revealed");
+  initialCluster.setAttribute("aria-pressed", String(isRevealed));
+});
+
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  window.setTimeout(createShootingStar, 5000);
+  window.setInterval(createShootingStar, 15000);
+}
 
 if (window.matchMedia("(pointer: fine)").matches) {
   document.addEventListener("pointermove", (event) => {

@@ -81,6 +81,123 @@ body.pointer-active .cursor-glow {
   opacity: 1;
 }
 
+.shooting-sky {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.shooting-star {
+  position: absolute;
+  top: var(--start-y);
+  left: var(--start-x);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #fff8ff;
+  box-shadow:
+    0 0 0.4rem rgba(255, 240, 255, 0.9),
+    0 0 1rem rgba(206, 167, 226, 0.68);
+  opacity: 0;
+  animation: shootingStar var(--shoot-duration) linear forwards;
+}
+
+.shooting-star::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 1px;
+  width: var(--tail-length);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(215, 183, 233, 0.65), #fff8ff);
+  transform: translateY(-50%) rotate(var(--shoot-angle));
+  transform-origin: right center;
+}
+
+.initial-cluster {
+  position: absolute;
+  z-index: 2;
+  top: 66svh;
+  right: clamp(1.5rem, 6vw, 6rem);
+  width: clamp(10rem, 16vw, 14rem);
+  padding: 0;
+  border: 0;
+  color: var(--purple-light);
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.28;
+  transform: rotate(-4deg);
+  transition:
+    opacity 0.5s ease,
+    transform 0.7s var(--ease-out);
+}
+
+.initial-cluster:hover,
+.initial-cluster:focus-visible,
+.initial-cluster.revealed {
+  opacity: 0.9;
+  transform: rotate(0deg) scale(1.03);
+}
+
+.initial-cluster:focus-visible {
+  outline: 1px solid rgba(227, 194, 236, 0.5);
+  outline-offset: 0.5rem;
+  border-radius: 0.4rem;
+}
+
+.initial-cluster svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.initial-traces {
+  fill: none;
+  stroke: rgba(222, 198, 235, 0.48);
+  stroke-width: 0.7;
+  stroke-dasharray: 190;
+  stroke-dashoffset: 190;
+  transition: stroke-dashoffset 1.4s var(--ease-out);
+}
+
+.initial-stars {
+  fill: #f7e8ff;
+  filter: drop-shadow(0 0 4px rgba(216, 182, 234, 0.9));
+}
+
+.initial-stars circle:nth-child(3n) {
+  fill: var(--pink);
+}
+
+.initial-cluster:hover .initial-traces,
+.initial-cluster:focus-visible .initial-traces,
+.initial-cluster.revealed .initial-traces {
+  stroke-dashoffset: 0;
+}
+
+.initial-cluster > span {
+  display: block;
+  margin-top: -0.2rem;
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: 0.72rem;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  transform: translateY(0.35rem);
+  transition:
+    opacity 0.45s 0.35s ease,
+    transform 0.55s 0.3s var(--ease-out);
+}
+
+.initial-cluster:hover > span,
+.initial-cluster:focus-visible > span,
+.initial-cluster.revealed > span {
+  opacity: 0.78;
+  transform: translateY(0);
+}
+
 .ambient-star {
   position: absolute;
   top: var(--top);
@@ -92,6 +209,14 @@ body.pointer-active .cursor-glow {
   box-shadow: 0 0 calc(var(--size) * 5) rgba(226, 199, 242, 0.65);
   opacity: var(--opacity);
   animation: twinkle var(--duration) ease-in-out var(--delay) infinite alternate;
+}
+
+.ambient-star.accent-star {
+  width: calc(var(--size) + 0.8px);
+  height: calc(var(--size) + 0.8px);
+  box-shadow:
+    0 0 0.45rem rgba(239, 219, 249, 0.72),
+    0 0 1rem rgba(199, 159, 221, 0.3);
 }
 
 .site-header {
@@ -397,6 +522,35 @@ h1 em {
 .story-star:focus-visible .star-label {
   color: var(--ink);
   opacity: 1;
+}
+
+.story-star.is-opened .star-core {
+  width: 0.58rem;
+  height: 0.58rem;
+  background: #fffaff;
+  box-shadow:
+    0 0 0.65rem rgba(255, 247, 255, 1),
+    0 0 1.55rem rgba(220, 190, 237, 0.95),
+    0 0 3.4rem rgba(204, 158, 229, 0.65);
+}
+
+.story-star.is-opened .star-halo {
+  border-color: rgba(234, 214, 246, 0.5);
+  opacity: 0.5;
+  transform: scale(1.05);
+}
+
+.story-star.is-opened .star-label {
+  color: var(--ink);
+  opacity: 0.86;
+}
+
+.letter-star.is-opened .star-core {
+  background: #ffe5f2;
+  box-shadow:
+    0 0 0.65rem rgba(255, 235, 246, 1),
+    0 0 1.55rem rgba(239, 184, 212, 0.9),
+    0 0 3.4rem rgba(223, 133, 178, 0.58);
 }
 
 .legend {
@@ -875,6 +1029,23 @@ footer svg {
   to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
+@keyframes shootingStar {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+  10% {
+    opacity: 0.9;
+  }
+  72% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--travel-x), var(--travel-y), 0);
+  }
+}
+
 @media (max-width: 720px) {
   .site-header {
     padding-top: 1.5rem;
@@ -890,6 +1061,12 @@ footer svg {
 
   h1 {
     font-size: clamp(3.4rem, 18vw, 5.2rem);
+  }
+
+  .initial-cluster {
+    top: 75svh;
+    right: 1.25rem;
+    width: 9.5rem;
   }
 
   .sky {
