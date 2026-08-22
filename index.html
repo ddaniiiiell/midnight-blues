@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A tiny universe of memories and letters, made with love."
+    />
+    <meta name="theme-color" content="#171020" />
+    <title>Our Little Universe</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <div class="aurora aurora-one" aria-hidden="true"></div>
+      <div class="aurora aurora-two" aria-hidden="true"></div>
+      <div class="grain" aria-hidden="true"></div>
+      <div class="cursor-glow" aria-hidden="true"></div>
+
+      <div class="ambient-stars" aria-hidden="true"></div>
+
+      <header class="site-header">
+        <a class="wordmark" href="#top" aria-label="Our little universe, home">
+          <svg viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M16 3c.7 7.8 5.2 12.3 13 13-7.8.7-12.3 5.2-13 13-.7-7.8-5.2-12.3-13-13C10.8 15.3 15.3 10.8 16 3Z" />
+          </svg>
+          <span>ours, after midnight</span>
+        </a>
+        <span class="made-for">made for my favorite person</span>
+      </header>
+
+      <main id="top">
+        <section class="hero" aria-labelledby="hero-title">
+          <p class="eyebrow"><span></span> a tiny corner of the sky</p>
+          <h1 id="hero-title">
+            I made you a<br />
+            <em>little universe.</em>
+          </h1>
+          <p class="hero-copy">
+            Every light holds a place for us&mdash;a memory to keep, a letter to
+            open, and all the lovely things still to come.
+          </p>
+          <button class="enter-button" type="button">
+            <span>look up</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M10 3v13M5.5 11.5 10 16l4.5-4.5" />
+            </svg>
+          </button>
+        </section>
+
+        <section class="sky" aria-labelledby="sky-title">
+          <div class="sky-heading">
+            <div>
+              <p class="eyebrow"><span></span> our constellation</p>
+              <h2 id="sky-title">Pick a star, love.</h2>
+            </div>
+            <p>Some hold memories. Others are letters waiting for you.</p>
+          </div>
+
+          <div class="constellation" aria-label="An interactive constellation of memories and letters">
+            <svg class="constellation-lines" viewBox="0 0 1000 620" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M117 400 L274 198 L455 308 L622 126 L758 283 L893 179" />
+              <path d="M274 198 L340 500 L455 308 L646 483 L758 283" />
+            </svg>
+
+            <button class="story-star memory-star" style="--x: 11.7%; --y: 64.5%; --delay: .05s" data-story="memory-one" type="button">
+              <span class="star-halo"></span>
+              <span class="star-core"></span>
+              <span class="star-label">memory no. 01</span>
+            </button>
+
+            <button class="story-star letter-star" style="--x: 27.4%; --y: 31.9%; --delay: .15s" data-story="letter-one" type="button">
+              <span class="star-halo"></span>
+              <span class="star-core"></span>
+              <span class="star-label">open when you miss me</span>
+            </button>
+
+            <button class="story-star memory-star" style="--x: 45.5%; --y: 49.7%; --delay: .25s" data-story="memory-two" type="button">
+              <span class="star-halo"></span>
+              <span class="star-core"></span>
+              <span class="star-label">memory no. 02</span>
+            </button>
+
+            <button class="story-star letter-star" style="--x: 62.2%; --y: 20.3%; --delay: .35s" data-story="letter-two" type="button">
+              <span class="star-halo"></span>
+              <span class="star-core"></span>
+              <span class="star-label">open on a hard day</span>
+            </button>
+
+            <button class="story-star memory-star" style="--x: 75.8%; --y: 45.6%; --delay: .45s" data-story="memory-three" type="button">
+              <span class="star-halo"></span>
+              <span class="star-core"></span>
+              <span class="star-label">memory no. 03</span>
+            </button>
+
+            <button class="story-star letter-star" style="--x: 89.3%; --y: 28.8%; --delay: .55s" data-story="letter-three" type="button">
+              <span class="star-halo"></span>
+              <span class="star-core"></span>
+              <span class="star-label">open when you need a smile</span>
+            </button>
+
+            <button class="story-star memory-star" style="--x: 34%; --y: 80.6%; --delay: .65s" data-story="memory-four" type="button">
+              <span class="star-halo"></span>
+              <span class="star-core"></span>
+              <span class="star-label">memory no. 04</span>
+            </button>
+
+            <button class="story-star memory-star" style="--x: 64.6%; --y: 77.9%; --delay: .75s" data-story="memory-five" type="button">
+              <span class="star-halo"></span>
+              <span class="star-core"></span>
+              <span class="star-label">memory no. 05</span>
+            </button>
+
+            <div class="sky-hint" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m6 18 12-12M11 6h7v7" /></svg>
+              <span>the brightest ones<br />have something to say</span>
+            </div>
+          </div>
+
+          <div class="legend" aria-label="Constellation legend">
+            <span><i class="memory-key"></i> memories</span>
+            <span><i class="letter-key"></i> little letters</span>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <p>More of our universe is waiting to be written.</p>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 20S4 15.4 4 9.5A4.5 4.5 0 0 1 12 6.7a4.5 4.5 0 0 1 8 2.8C20 15.4 12 20 12 20Z" />
+        </svg>
+      </footer>
+    </div>
+
+    <dialog class="story-dialog" aria-labelledby="dialog-title">
+      <button class="close-dialog" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+      </button>
+      <div class="dialog-content"></div>
+    </dialog>
+
+    <template id="memory-template">
+      <article class="memory-card">
+        <p class="dialog-kicker">a memory for safekeeping</p>
+        <div class="photo-placeholder" aria-label="Placeholder for a future photo">
+          <svg viewBox="0 0 80 80" aria-hidden="true">
+            <path d="M13 60 31 39l13 14 8-9 15 16M13 18h54v44H13z" />
+            <circle cx="52" cy="30" r="5" />
+          </svg>
+          <span>your photo will live here</span>
+        </div>
+        <div class="memory-copy">
+          <p class="memory-date">someday, somewhere lovely</p>
+          <h3 id="dialog-title">A favorite moment</h3>
+          <p>This star is waiting for a story only the two of you could tell.</p>
+        </div>
+      </article>
+    </template>
+
+    <template id="letter-template">
+      <article class="letter-card">
+        <p class="dialog-kicker">a little letter</p>
+        <div class="envelope-wrap">
+          <div class="envelope" aria-hidden="true">
+            <div class="envelope-back"></div>
+            <div class="letter-sheet">
+              <span>for you, always</span>
+              <i></i><i></i><i></i>
+            </div>
+            <div class="envelope-front"></div>
+            <div class="envelope-flap"></div>
+            <div class="wax-seal">
+              <svg viewBox="0 0 24 24"><path d="M12 19s-6-3.5-6-8a3.5 3.5 0 0 1 6-2.2A3.5 3.5 0 0 1 18 11c0 4.5-6 8-6 8Z" /></svg>
+            </div>
+          </div>
+        </div>
+        <div class="letter-intro">
+          <p class="memory-date">sealed with love</p>
+          <h3 id="dialog-title">Open when&hellip;</h3>
+          <button class="open-letter" type="button">open this letter</button>
+        </div>
+        <div class="letter-message" aria-live="polite">
+          <p>My love,</p>
+          <p>This page is waiting for the words you want her to find here.</p>
+          <p class="letter-signoff">Always yours,<br /><span>your favorite person</span></p>
+        </div>
+      </article>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
